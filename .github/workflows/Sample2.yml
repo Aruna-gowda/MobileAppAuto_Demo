@@ -4,7 +4,7 @@ name: Automation Execution1
 on:
   push:
     branches:
-      - Branch2_Test  # or your target branch
+      - master  # or your target branch
   pull_request:
 
 jobs:
