@@ -10,10 +10,10 @@ jobs:
   generate-allure-report:
     runs-on: ubuntu-20.04 # Set the operating system for the job
 
-    # defaults:
-    #   run:
-    #     shell: bash # Set the shell for the job
-    #     working-directory: ./tests # Set the working directory for the job
+    defaults:
+      run:
+        shell: bash # Set the shell for the job
+        working-directory: ./TestCases # Set the working directory for the job
 
     steps:
       - name: Checkout repo # Step to check out the repository
