@@ -40,18 +40,20 @@ jobs:
           name: allure-results
           path: allure-results
 
-      # Step 6: Install Allure and generate Allure report
-      - name: Install Allure
+      # Step 6: Download and Install Allure manually
+      - name: Download and Install Allure
         run: |
-          sudo apt-add-repository ppa:qameta/allure
-          sudo apt-get update
-          sudo apt-get install allure
+          wget https://github.com/allure-framework/allure2/releases/download/2.20.1/allure-2.20.1.tgz
+          tar -zxvf allure-2.20.1.tgz
+          sudo mv allure-2.20.1 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
 
+      # Step 7: Generate Allure HTML Report
       - name: Generate Allure HTML Report
         run: |
           allure generate allure-results --clean -o allure-report
 
-      # Step 7: Upload Allure HTML report as an artifact
+      # Step 8: Upload Allure HTML report as an artifact
       - name: Upload Allure HTML Report
         uses: actions/upload-artifact@v3
         with:
