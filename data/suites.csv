@@ -1,2 +1,3 @@
 "Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
-"passed","Thu Sep 19 07:52:19 UTC 2024","Thu Sep 19 07:52:22 UTC 2024","2729","TestCases","test_Sample","TestLoginPage","","","Verify User able to login with valid Credentials",""
+"passed","Thu Sep 19 07:58:24 UTC 2024","Thu Sep 19 07:58:26 UTC 2024","1304","TestCases","test_Sample","TestLoginPage","","","Verify User able to login with valid Credentials",""
+"passed","Thu Sep 19 07:58:22 UTC 2024","Thu Sep 19 07:58:24 UTC 2024","2041","TestCases","test_LoginPage","TestHomePage","","","Verify User able to login with valid Credentials",""
