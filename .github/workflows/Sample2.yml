@@ -1,6 +1,7 @@
 name: Automation Execution1
 
 on:
+  workflow_dispatch:  # Add this to enable manual triggering
   push:
     branches:
       - master  # or your target branch
