@@ -1,81 +1,63 @@
-name: CreateTag
+name: Automation Execution1
 
 on:
-  schedule:
-    - cron: "0 1 * * 5" # Runs every Friday at 1AM UTC
   push:
     branches:
-      - master
+      - master  # or your target branch
+  pull_request:
 
 jobs:
-  RunTests:
+  build:
     runs-on: ubuntu-latest
 
-    env:
-      majorVersion: '23'
-
     steps:
-      - name: Checkout code
+      # Step 1: Check out repository
+      - name: Check out repository
         uses: actions/checkout@v3
+
+      # Step 2: Set up Python environment
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
         with:
-          persist-credentials: true
+          python-version: '3.12'
 
-      - name: Set up Python and install dependencies
+      # Step 3: Install dependencies
+      - name: Install dependencies
         run: |
-          SEPARATOR="==================================================="
-          YELLOW="\033[0;33m"
-          RESET="\033[0m"
-
-          echo -e "${YELLOW}$SEPARATOR\n${YELLOW}Setting Python\n${YELLOW}$SEPARATOR${RESET}"
-          sudo apt-get update
-          sudo apt-get install google-chrome-stable
-          google-chrome --version
           python -m pip install --upgrade pip
+		  pip install -r requirements.txt
+          pip install allure-pytest  # Install allure-pytest
           pip install -r requirements.txt
 
-      - name: Install Allure CLI
+      - name: Prepare Allure history # Step to prepare Allure history directory
         run: |
-          SEPARATOR="==================================================="
-          YELLOW="\033[0;33m"
-          RESET="\033[0m"
+          cd ..
+          mkdir -p ${{ vars.ALLURE_RESULTS_PATH }}
 
-          echo -e "${YELLOW}$SEPARATOR\n${YELLOW}Install Allure CLI\n${YELLOW}$SEPARATOR${RESET}"
-          sudo apt-get install npm
-          npm install -g allure-commandline --save-dev
-          allure --version
-
-      - name: Run Testcases
+      - name: Run tests with pytest # Step to run tests using pytest
         run: |
-          SEPARATOR="==================================================="
-          YELLOW="\033[0;33m"
-          RESET="\033[0m"
+          python -m pytest -v --gherkin-terminal-reporter -s --tags="${{ github.event.inputs.tags }}" --color=yes --alluredir=../${{ vars.ALLURE_RESULTS_PATH }}
 
-          echo -e "${YELLOW}$SEPARATOR\n${YELLOW}Run Pytest\n${YELLOW}$SEPARATOR${RESET}"
-          pytest --alluredir=./TestResults
-          ls
-
-          echo -e "${YELLOW}$SEPARATOR\n${YELLOW}Listing Results Directory\n${YELLOW}$SEPARATOR${RESET}"
-          ls -ltr ./TestResults
-        continue-on-error: true
-
-      - name: Generate Test Reports
-        run: |
-          SEPARATOR="==================================================="
-          YELLOW="\033[0;33m"
-          RESET="\033[0m"
-
-          echo -e "${YELLOW}$SEPARATOR\n${YELLOW}Generate Reports\n${YELLOW}$SEPARATOR${RESET}"
-          allure generate --clean ./TestResults --report-dir ./Report --single-file
-          pwd
-
-      - name: Upload Test Reports
-        uses: actions/upload-artifact@v3
+      - name: Get Allure history # Step to retrieve Allure history
+        uses: actions/checkout@v3
+        if: always() # Execute even if previous steps fail
+        continue-on-error: true # Continue execution even if the step fails
         with:
-          name: Reports
-          path: ./Report
+          ref: gh-pages # Specify the branch to retrieve Allure history from
+          path: gh-pages # Set the destination path for Allure history
 
-      - name: Publish Allure Report
-        uses: mikepenz/action-allure-report@v2
+      - name: Allure report action # Step to generate Allure report
+        uses: simple-elf/allure-report-action@master
+        if: always() # Execute even if previous steps fail
         with:
-          allure_version: "2.27.0"
-          results: "./TestResults"
+          allure_results: ${{ vars.ALLURE_RESULTS_PATH }} # Specify the directory containing Allure results
+          allure_history: allure-history # Specify the directory to store Allure history
+          keep_reports: 5 # Specify the number of previous reports to keep
+
+      - name: Deploy Allure report to GitHub Pages # Step to deploy Allure report to GitHub Pages
+        if: always() # Execute even if previous steps fail
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Provide the GitHub token for authentication
+          publish_branch: gh-pages # Specify the branch to publish the report to
+          publish_dir: allure-history # Specify the directory containing the report
