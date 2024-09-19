@@ -3,7 +3,7 @@ name: Get Repository Path
 on: 
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
