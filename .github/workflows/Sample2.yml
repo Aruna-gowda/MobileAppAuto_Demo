@@ -29,11 +29,10 @@ jobs:
           pip install allure-pytest  # Install allure-pytest
           pip install -r requirements.txt
 
-      - name: Run tests and generate Allure report
+      # Step 4: Run Pytest with Allure
+      - name: Run tests with pytest and generate allure results
         run: |
-          # Run your tests here, e.g., with Maven, Gradle, etc.
-          ./gradlew test
-          allure serve build/allure-results
+          pytest --alluredir=allure-results
 
       - name: Generate Allure report
         run: |
