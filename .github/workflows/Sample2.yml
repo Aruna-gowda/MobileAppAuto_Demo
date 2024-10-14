@@ -34,6 +34,12 @@ jobs:
         run: |
           pytest --alluredir=allure-results
 
+      - name: Run tests and generate Allure report
+        run: |
+          # Run your tests here, e.g., with Maven, Gradle, etc.
+          ./gradlew test
+          allure serve build/allure-results
+
       - name: Generate Allure report
         run: |
           allure generate build/allure-results --report-dir build/allure-report
