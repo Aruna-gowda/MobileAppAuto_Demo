@@ -60,10 +60,4 @@ jobs:
       - name: Send notification to Slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN}}  # Slack bot token stored in GitHub secrets
-          slack-channel: 'C07RSDQMPC3'  # Replace with your Slack channel
-          text: 'Allure report generated for Automation Execution1. [View Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})'
-
-      - name: Debug Slack Token
-        run: echo "Slack Bot Token: ${{ secrets.SLACK_BOT_TOKEN }}"
-
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}  #
