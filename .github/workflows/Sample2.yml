@@ -62,7 +62,9 @@ jobs:
         with:
           channel-id: 'C07RSDQMPC3'  # Replace with your Slack channel ID
           slack-message: 'Allure report generated for Automation Execution1. [View Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})'
-          botToken: ${{ secrets.SLACK_BOT_TOKEN }}  # Slack bot token stored in GitHub secrets
+          botToken: ${{ secrets.SLACK_BOT_TOKEN }}
+          echo "Slack Bot Token: ${{ secrets.SLACK_BOT_TOKEN }}"
+          #botToken: ${{ secrets.SLACK_BOT_TOKEN }}  # Slack bot token stored in GitHub secrets
 
       # # Debug step (optional, remove after confirming the token)
       # - name: Debug Slack Token
