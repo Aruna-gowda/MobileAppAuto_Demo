@@ -1,89 +1,37 @@
-name: Appium Automation on macOS
-
+name: Android emulator
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
+    
+env:
+  ANDROID_ARCH: x86_64
+  ANDROID_TARGET: google_apis_playstore
+  API_LEVEL: 33
+  ANDROID_BUILD_TOOLS_VERSION: 33.0.2
+  ANDROID_SDK_PACKAGES: system-images;android-33;google_apis_playstore;x86_64 platforms;android-33 build-tools;33.0.2 platform-tools emulator
+  EMULATOR_TIMEOUT: 350
+  EMULATOR_NAME: nexus
 
 jobs:
-  test-qa:
-    name: Run Appium Tests for QA Build
+  playwright-emulator:
+    timeout-minutes: 20
     runs-on: macos-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # Install Node.js (latest)
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 'latest'
-
-      # Install Java 8
-      - name: Install Java JDK
+      - uses: actions/checkout@v3
+        
+      - name: Add avdmanager and sdkmanager to system PATH
         run: |
-          brew install --cask temurin  # Install OpenJDK from Temurin
-          java -version  # Verify Java installation
-          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-          export PATH=$PATH:$JAVA_HOME/bin
+            echo "$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS_VERSION }}" >> $GITHUB_PATH
 
-      # Install Android SDK and set up environment variables
-      - name: Install Android SDK
+      - name: Install Sdk
         run: |
-          brew install --cask android-sdk
-          echo "export ANDROID_HOME=$HOME/Library/Android/sdk" >> $HOME/.bash_profile
-          echo "export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools" >> $HOME/.bash_profile
-          source $HOME/.bash_profile
-          sdkmanager --version  # Verify sdkmanager installation
-
-      # Install Appium and drivers
-      - name: Install Appium and Drivers
+           yes Y | sdkmanager --licenses
+           sdkmanager --install ${ANDROID_SDK_PACKAGES}
+  
+      - name: Build emulator
         run: |
-          npm install -g appium appium-doctor
-          appium driver install uiautomator2
-          appium driver install xcuitest
+            echo "no" | avdmanager --verbose create avd --force -n $EMULATOR_NAME --abi "${ANDROID_TARGET}/${ANDROID_ARCH}" -k "system-images;android-${API_LEVEL};${ANDROID_TARGET};${ANDROID_ARCH}"
 
-      # Set up and start Android emulator (API 30)
-      - name: Create and Start Android Emulator (API 30)
+      - name: Launch emulator
         run: |
-          brew install --cask android-studio system-images;android-30;default;x86_64
-          # sdkmanager --install 'system-images;android-30;default;x86_64'
-          avdmanager create avd -n Pixel_API_30_AOSP -k 'system-images;android-30;default;x86_64' --force
-          nohup emulator -avd Pixel_API_30_AOSP -no-window -no-boot-anim &
-
-      # Wait for Android emulator to boot
-      - name: Wait for Android Emulator to Boot
-        run: |
-          adb wait-for-device
-          adb shell input keyevent 82
-
-      # Install Python dependencies
-      - name: Install Python Dependencies
-        run: |
-          pip install Appium-Python-Client
-          pip install -r requirements.txt
-
-      # Print iOS simulator information
-      - name: Print Platform Version and Device Name for Simulator
-        run: |
-          echo "Platform Version: $(xcrun simctl list runtimes | grep -oE 'iOS [0-9]+\.[0-9]+' | tail -1)"
-          echo "Device Name: $(xcrun simctl list devices | grep -E 'iPhone' | head -1)"
-
-      # Start Appium server
-      - name: Start Appium Server
-        run: |
-          appium -v
-          appium --allow-insecure=adb_security --port 4723 --address 0.0.0.0 &
-
-      # Run Python Appium tests
-      - name: Run Python Appium Tests
-        run: |
-          pytest --alluredir=./TestResults
-
-      # Publish Allure report
-      - name: Publish Allure Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: allure-results
-          path: ./TestResults
+          chmod +x ./start_emu_headless.sh
+          EMULATOR_TIMEOUT=$EMULATOR_TIMEOUT EMULATOR_NAME=$EMULATOR_NAME ./start_emu_headless.sh
