@@ -38,9 +38,10 @@ jobs:
       # Set up and start Android emulator
       - name: Create and Start Android Emulator
         run: |
-          sdkmanager --install 'system-images;android-29;default;x86_64'
-          avdmanager create avd -n Pixel_API_29_AOSP -k 'system-images;android-29;default;x86_64' --force
-          nohup emulator -avd Pixel_API_29_AOSP -no-window -no-boot-anim &
+          sdkmanager --install 'system-images;android-30;default;x86_64'
+          avdmanager create avd -n Pixel_API_30_AOSP -k 'system-images;android-30;default;x86_64' --force
+          nohup emulator -avd Pixel_API_30_AOSP -no-window -no-boot-anim &
+          # Pixel 8a API 35
 
       # Wait for Android emulator to boot
       - name: Wait for Android Emulator to Boot
