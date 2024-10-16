@@ -47,7 +47,8 @@ jobs:
       # Set up and start Android emulator (API 30)
       - name: Create and Start Android Emulator (API 30)
         run: |
-          sdkmanager --install 'system-images;android-30;default;x86_64'
+          brew install --cask android-studio system-images;android-30;default;x86_64
+          # sdkmanager --install 'system-images;android-30;default;x86_64'
           avdmanager create avd -n Pixel_API_30_AOSP -k 'system-images;android-30;default;x86_64' --force
           nohup emulator -avd Pixel_API_30_AOSP -no-window -no-boot-anim &
 
