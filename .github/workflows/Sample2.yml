@@ -1,5 +1,4 @@
-name: Android Emulator
-
+name: Android emulator
 on:
   push:
     branches:
@@ -36,9 +35,5 @@ jobs:
 
       - name: Launch emulator
         run: |
-          nohup emulator -avd $EMULATOR_NAME -no-window -no-boot-anim &
-
-      - name: Wait for Android Emulator to Boot
-        run: |
-          adb wait-for-device
-          adb shell input keyevent 82
+          chmod +x ./start_emu_headless.sh
+          EMULATOR_TIMEOUT=$EMULATOR_TIMEOUT EMULATOR_NAME=$EMULATOR_NAME ./start_emu_headless.sh
