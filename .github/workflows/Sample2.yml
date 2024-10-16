@@ -35,20 +35,33 @@ jobs:
           appium driver install uiautomator2
           appium driver install xcuitest
 
-      # Set up Android environment
-      - name: Set up Android environment variables
+      # Set up and start Android emulator
+      - name: Create and Start Android Emulator
         run: |
-          export ANDROID_HOME=$HOME/Library/Android/sdk
-          export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
-        env:
-          ANDROID_HOME: ${{ runner.os }}/Library/Android/sdk
-          PATH: ${{ runner.os }}/Library/Android/sdk/tools:${{ runner.os }}/Library/Android/sdk/platform-tools:$PATH
+          sdkmanager --install 'system-images;android-29;default;x86_64'
+          avdmanager create avd -n Pixel_API_29_AOSP -k 'system-images;android-29;default;x86_64' --force
+          nohup emulator -avd Pixel_API_29_AOSP -no-window -no-boot-anim &
+
+      # Wait for Android emulator to boot
+      - name: Wait for Android Emulator to Boot
+        run: |
+          adb wait-for-device
+          adb shell input keyevent 82
+
+      # # Set up Android environment
+      # - name: Set up Android environment variables
+      #   run: |
+      #     export ANDROID_HOME=$HOME/Library/Android/sdk
+      #     export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
+      #   env:
+      #     ANDROID_HOME: ${{ runner.os }}/Library/Android/sdk
+      #     PATH: ${{ runner.os }}/Library/Android/sdk/tools:${{ runner.os }}/Library/Android/sdk/platform-tools:$PATH
 
       # Install Python dependencies
       - name: Install Python Dependencies
         run: |
           pip install Appium-Python-Client
-          pip install allure-pytest allure-python-commons pytest pytest-rerunfailures Selenium urllib3 openpyxl
+          pip install -r requirements.txt
 
       # Print iOS simulator information
       - name: Print Platform Version and Device Name for Simulator
