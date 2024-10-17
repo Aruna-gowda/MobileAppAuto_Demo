@@ -14,15 +14,9 @@ jobs:
       # Set environment variables for Android SDK, Java, and other tools
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
       ANDROID_HOME: $HOME/Library/Android/sdk
-      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
+      PATH: $ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools/bin:$PATH
 
     steps:
-      # Check for tar installation
-      - name: Check tar installation
-        run: |
-          which tar
-          tar --version
-
       # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
@@ -53,7 +47,22 @@ jobs:
         with:
           node-version: '20'
 
-      # Install Appium and related tools via npm
+      # Install Android SDK command-line tools
+      - name: Install Android SDK
+        run: |
+          echo "Setting up Android SDK"
+          mkdir -p "$ANDROID_HOME"
+          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          sdkmanager --licenses
+
+      # Create Android Emulator
+      - name: Create Android Emulator
+        run: |
+          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
+          emulator -avd test_avd -no-snapshot -no-audio -no-window &
+
+      # Set up Appium and drivers
       - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
@@ -61,16 +70,6 @@ jobs:
           appium-doctor --ios
           appium driver install uiautomator2
           appium driver install xcuitest
-
-      # Set up Android SDK and emulator
-      - name: Set up Android SDK and create Android Emulator
-        run: |
-          echo "Setting up Android SDK"
-          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
-          sdkmanager --install "system-images;android-30;google_apis;x86_64"
-          sdkmanager --licenses
-          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
-          emulator -avd test_avd -no-snapshot -no-audio -no-window &
 
       # Set up Xcode simulator
       - name: Set up Xcode Simulator
