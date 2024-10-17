@@ -48,40 +48,38 @@ jobs:
           node-version: '20'
 
       # Install Appium and related tools via npm
-      - name: Install Appium
+      - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
+          appium-doctor --android
+          appium-doctor --ios
           appium driver install uiautomator2
           appium driver install xcuitest
-        #   npm install -g appium
-        #   npm install -g appium-doctor
-        #   appium-doctor --android
-          
+
       # Set up Android SDK and emulator
-      - name: Set up Android SDK
+      - name: Set up Android SDK and create Android Emulator
         run: |
           echo "Setting up Android SDK"
           sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
           sdkmanager --install "system-images;android-30;google_apis;x86_64"
           sdkmanager --licenses
           avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
-          emulator -avd test_avd -no-snapshot &
+          emulator -avd test_avd -no-snapshot -no-audio -no-window &
 
       # Set up Xcode simulator
       - name: Set up Xcode Simulator
         run: |
-          xcode-select --install
           sudo xcodebuild -license accept
-          xcrun simctl boot "iPhone 14" # Booting a simulator
+          xcrun simctl boot "iPhone 14" # Booting iPhone simulator
 
       # Run Appium tests
       - name: Run Appium tests
         run: |
           appium & # Start Appium server
-          python -m pytest --alluredir=allure-results # Run your tests
+          python -m pytest --alluredir=allure-results # Run tests and store Allure results
 
       # Generate and store Allure report
-      - name: Allure Report Generation
+      - name: Generate Allure Report
         run: |
           allure generate allure-results --clean -o allure-report
         continue-on-error: true
