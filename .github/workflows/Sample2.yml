@@ -11,10 +11,8 @@ jobs:
     runs-on: macos-latest
 
     env:
-      # Set environment variables for Android SDK, Java, and other tools
+      # Set environment variables for Java JDK
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
-      ANDROID_HOME: $HOME/Library/Android/sdk
-      PATH: $ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools/bin:$PATH
 
     steps:
       # Checkout code
@@ -47,28 +45,44 @@ jobs:
         with:
           node-version: '20'
 
+      # Install Android SDK Command-line tools
+      - name: Install Android SDK Command-line tools
+        run: |
+          echo "Downloading Android SDK Command-line tools"
+          export ANDROID_HOME=$HOME/Library/Android/sdk
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          curl -fo commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-mac-9477386_latest.zip
+          unzip -q commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+
+          # Update environment variables
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH" >> $GITHUB_ENV
+
+      # Set up Android SDK and create Android Emulator
+      - name: Set up Android SDK and create Android Emulator
+        shell: bash
+        run: |
+          echo "Setting up Android SDK"
+          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          yes | sdkmanager --licenses
+
+          echo "Creating Android Emulator"
+          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
+
+          echo "Starting Android Emulator"
+          nohup emulator -avd test_avd -no-snapshot -no-audio -no-window &
+
       # Install Appium and related tools via npm
       - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
+          appium-doctor --android
+          appium-doctor --ios
           appium driver install uiautomator2
           appium driver install xcuitest
-
-      # Install Android SDK command-line tools
-      - name: Install Android SDK Command-line Tools
-        run: |
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip
-          unzip sdk-tools.zip -d $ANDROID_HOME/cmdline-tools
-          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
-
-      # Set up Android Emulator
-      - name: Create and Launch Android Emulator
-        run: |
-          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
-          emulator -avd test_avd -no-snapshot -no-audio -no-window &
 
       # Set up Xcode simulator
       - name: Set up Xcode Simulator
@@ -80,6 +94,7 @@ jobs:
       - name: Run Appium tests
         run: |
           appium & # Start Appium server
+          sleep 10 # Wait for Appium server to start
           python -m pytest --alluredir=allure-results # Run tests and store Allure results
 
       # Generate and store Allure report
