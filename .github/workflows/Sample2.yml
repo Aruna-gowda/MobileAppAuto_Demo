@@ -14,15 +14,9 @@ jobs:
       # Set environment variables for Android SDK, Java, and other tools
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
       ANDROID_HOME: $HOME/Library/Android/sdk
-      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
+      PATH: $ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools/bin:$PATH
 
     steps:
-      # Check for tar installation
-      - name: Check tar installation
-        run: |
-          which tar
-          tar --version
-
       # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
@@ -57,18 +51,22 @@ jobs:
       - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
-          # appium-doctor --android
-          # appium-doctor --ios
           appium driver install uiautomator2
           appium driver install xcuitest
 
-      # Set up Android SDK and emulator
-      - name: Set up Android SDK and create Android Emulator
+      # Install Android SDK command-line tools
+      - name: Install Android SDK Command-line Tools
         run: |
-          echo "Setting up Android SDK"
-          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
-          sdkmanager --install "system-images;android-30;google_apis;x86_64"
-          sdkmanager --licenses
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip
+          unzip sdk-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3" "system-images;android-30;google_apis;x86_64"
+
+      # Set up Android Emulator
+      - name: Create and Launch Android Emulator
+        run: |
           avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
           emulator -avd test_avd -no-snapshot -no-audio -no-window &
 
