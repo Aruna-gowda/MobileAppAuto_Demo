@@ -25,12 +25,15 @@ jobs:
           brew install --cask android-sdk
           brew install node
 
-      # Set environment variables for Android SDK, Java, and other tools
+      # Set environment variables for Android SDK and other tools
       - name: Set Environment Variables
         run: |
-          echo "JAVA_HOME=/usr/local/opt/openjdk@17" >> $GITHUB_ENV
+          # Get the path for Java installation
+          JAVA_PATH=$(brew --prefix openjdk@17)
+          
+          echo "JAVA_HOME=${JAVA_PATH}" >> $GITHUB_ENV
           echo "ANDROID_HOME=$HOME/Library/Android/sdk" >> $GITHUB_ENV
-          echo "PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/opt/openjdk@17/bin:$PATH" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:${JAVA_PATH}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" >> $GITHUB_ENV
 
       # Check for tar installation
       - name: Check tar installation
