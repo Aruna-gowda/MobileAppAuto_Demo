@@ -17,12 +17,6 @@ jobs:
       PATH: $ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
 
     steps:
-      # Step to ensure `tar` and essential tools are installed
-      - name: Install system utilities
-        run: |
-          brew install tar
-          brew install wget
-
       # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
