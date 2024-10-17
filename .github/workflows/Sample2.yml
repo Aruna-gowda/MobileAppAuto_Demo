@@ -14,9 +14,15 @@ jobs:
       # Set environment variables for Android SDK, Java, and other tools
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
       ANDROID_HOME: $HOME/Library/Android/sdk
-      PATH: $ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
+      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
 
     steps:
+      # Check for tar installation
+      - name: Check tar installation
+        run: |
+          which tar
+          tar --version
+
       # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
