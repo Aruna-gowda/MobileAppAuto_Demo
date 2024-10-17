@@ -1,40 +1,91 @@
-name: Android Emulator
+name: Python Appium Automation with Allure Reporting on macOS
 
 on:
   push:
     branches:
       - master
-    
-env:
-  ANDROID_ARCH: arm64-v8a  # Changed from x86_64 to arm64-v8a
-  ANDROID_TARGET: google_apis_playstore
-  API_LEVEL: 33
-  ANDROID_BUILD_TOOLS_VERSION: 33.0.2
-  ANDROID_SDK_PACKAGES: system-images;android-33;google_apis_playstore;arm64-v8a platforms;android-33 build-tools;33.0.2 platform-tools emulator
-  EMULATOR_TIMEOUT: 350
-  EMULATOR_NAME: nexus
+  pull_request:
 
 jobs:
-  playwright-emulator:
-    timeout-minutes: 20
+  setup-emulator-simulator:
     runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v3
-        
-      - name: Add avdmanager and sdkmanager to system PATH
-        run: |
-            echo "$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS_VERSION }}" >> $GITHUB_PATH
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Install SDK
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Print Python version
+        run: python --version
+
+      - name: Install dependencies
         run: |
-           yes Y | sdkmanager --licenses
-           sdkmanager --install ${ANDROID_SDK_PACKAGES}
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Print pip version
+        run: pip --version
+
+      # Install Java JDK (required by Android SDK)
+      - name: Install Java JDK
+        run: |
+          brew install --cask temurin  # Install OpenJDK from Temurin
+          java -version  # Verify Java installation
+          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+          export PATH=$PATH:$JAVA_HOME/bin
+      - name: Print Java version
+        run: java -version
   
-      - name: Build Emulator
+      # Install Node.js (required for Appium)
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '21'  # Updated to Node.js 20 to avoid deprecation warnings
+      - name: Print Node.js version
+        run: node --version
+  
+      # Install Appium (Global Installation)
+      - name: Install Appium
         run: |
-            echo "no" | avdmanager --verbose create avd --force -n $EMULATOR_NAME --abi "${ANDROID_TARGET}/${ANDROID_ARCH}" -k "system-images;android-${API_LEVEL};${ANDROID_TARGET};${ANDROID_ARCH}"
+          npm install -g appium
+          npm install -g appium-doctor
+      - name: Print Appium version
+        run: appium --version
+      - name: Install appium drivers for android
+        run: sudo appium driver install uiautomator2
+      - name: Install appium drivers for ios
+        run: sudo appium driver install xcuitest
+      
 
-      - name: Launch Emulator
+      # Android SDK setup
+      - name: Install Android SDK
         run: |
-          chmod +x ./start_emu_headless.sh
-          EMULATOR_TIMEOUT=$EMULATOR_TIMEOUT EMULATOR_NAME=$EMULATOR_NAME ./start_emu_headless.sh
+          brew install --cask android-sdk
+          echo "y" | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-33" "emulator" "system-images;android-33;google_apis;x86_64"
+      - name: Print Android SDK version
+        run: sdkmanager --version
+      
+      - name: Set up and start Android Emulator
+        run: |
+          avdmanager create avd -n testEmulator -k "system-images;android-33;google_apis;x86_64" --device "pixel"
+          nohup emulator -avd testEmulator -no-snapshot -no-window -gpu swiftshader_indirect & adb wait-for-device
+          adb shell input keyevent 82
+      - name: Print Android Emulator version
+        run: emulator -version
+
+      # iOS Simulator setup
+      - name: Install Xcode command line tools
+        run: |
+          xcode-select --install
+          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+      - name: Print Xcode version
+        run: xcodebuild -version
+      
+      - name: Create and boot iOS simulator
+        run: |
+          xcrun simctl create testSimulator com.apple.CoreSimulator.SimDeviceType.iPhone-14 com.apple.CoreSimulator.SimRuntime.iOS-16-4
+          xcrun simctl boot testSimulator
