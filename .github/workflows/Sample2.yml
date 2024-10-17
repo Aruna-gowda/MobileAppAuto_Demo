@@ -9,21 +9,12 @@ on:
 jobs:
   setup-run-publish:
     runs-on: macos-latest
-	
-  	env:
-  	  ANDROID_ARCH: arm64-v8a  # Changed from x86_64 to arm64-v8a
-  	  ANDROID_TARGET: google_apis_playstore
-  	  API_LEVEL: 33
-  	  ANDROID_BUILD_TOOLS_VERSION: 33.0.2
-  	  ANDROID_SDK_PACKAGES: system-images;android-33;google_apis_playstore;arm64-v8a platforms;android-33 build-tools;33.0.2 platform-tools emulator
-  	  EMULATOR_TIMEOUT: 100
-  	  EMULATOR_NAME: nexus
 
-    # env:
-    #   # Set environment variables for Android SDK, Java, and other tools
-    #   JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
-    #   ANDROID_HOME: $HOME/Library/Android/sdk
-    #   PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
+    env:
+      # Set environment variables for Android SDK, Java, and other tools
+      JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+      ANDROID_HOME: $HOME/Library/Android/sdk
+      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
 
     steps:
       # Check for tar installation
@@ -70,29 +61,16 @@ jobs:
           # appium-doctor --ios
           appium driver install uiautomator2
           appium driver install xcuitest
-		  
-	  - name: Add avdmanager and sdkmanager to system PATH
-        run: |
-            echo "$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS_VERSION }}" >> $GITHUB_PATH
 
-      - name: Install SDK
+      # Set up Android SDK and emulator
+      - name: Set up Android SDK and create Android Emulator
         run: |
-           yes Y | sdkmanager --licenses
-           sdkmanager --install ${ANDROID_SDK_PACKAGES}
-  
-      - name: Build Emulator
-        run: |
-            echo "no" | avdmanager --verbose create avd --force -n $EMULATOR_NAME --abi "${ANDROID_TARGET}/${ANDROID_ARCH}" -k "system-images;android-${API_LEVEL};${ANDROID_TARGET};${ANDROID_ARCH}"
-
-      # # Set up Android SDK and emulator
-      # - name: Set up Android SDK and create Android Emulator
-      #   run: |
-      #     echo "Setting up Android SDK"
-      #     sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
-      #     sdkmanager --install "system-images;android-30;google_apis;x86_64"
-      #     sdkmanager --licenses
-      #     avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
-      #     emulator -avd test_avd -no-snapshot -no-audio -no-window &
+          echo "Setting up Android SDK"
+          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          sdkmanager --licenses
+          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
+          emulator -avd test_avd -no-snapshot -no-audio -no-window &
 
       # Set up Xcode simulator
       - name: Set up Xcode Simulator
