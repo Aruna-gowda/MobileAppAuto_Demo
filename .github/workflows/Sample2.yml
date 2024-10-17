@@ -1,4 +1,4 @@
-name: Python Appium Automation with Allure Reporting on macOS
+name: Appium Python Mobile Automation
 
 on:
   push:
@@ -7,85 +7,88 @@ on:
   pull_request:
 
 jobs:
-  setup-emulator-simulator:
+  setup-run-publish:
     runs-on: macos-latest
 
+    env:
+      # Set environment variables for Android SDK, Java, and other tools
+      JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+      ANDROID_HOME: ${{ runner.tool_cache }}/android-sdk
+      PATH: ${{ runner.tool_cache }}/android-sdk/emulator:${{ runner.tool_cache }}/android-sdk/platform-tools:${{ runner.tool_cache }}/android-sdk/tools/bin:$PATH
+
     steps:
-      - name: Checkout repository
+      # Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Python environment
+      # Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - name: Print Python version
-        run: python --version
+          python-version: '3.x'
 
+      # Install Python dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Print pip version
-        run: pip --version
+          pip install allure-python-commons allure-behave
 
-      # Install Java JDK (required by Android SDK)
-      - name: Install Java JDK
-        run: |
-          brew install --cask temurin  # Install OpenJDK from Temurin
-          java -version  # Verify Java installation
-          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-          export PATH=$PATH:$JAVA_HOME/bin
-      - name: Print Java version
-        run: java -version
-  
-      # Install Node.js (required for Appium)
-      - name: Install Node.js
+      # Set up Java JDK
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Set up Node.js and npm
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '21'  # Updated to Node.js 20 to avoid deprecation warnings
-      - name: Print Node.js version
-        run: node --version
-  
-      # Install Appium (Global Installation)
+          node-version: '20'
+
+      # Install Appium and related tools via npm
       - name: Install Appium
         run: |
-          npm install -g appium
-          npm install -g appium-doctor
-      - name: Print Appium version
-        run: appium --version
-      - name: Install appium drivers for android
-        run: sudo appium driver install uiautomator2
-      - name: Install appium drivers for ios
-        run: sudo appium driver install xcuitest
-      
-
-      # Android SDK setup
-      - name: Install Android SDK
+          npm install -g appium appium-doctor
+          appium driver install uiautomator2
+          appium driver install xcuitest
+        #   npm install -g appium
+        #   npm install -g appium-doctor
+        #   appium-doctor --android
+          
+      # Set up Android SDK and emulator
+      - name: Set up Android SDK
         run: |
-          brew install --cask android-sdk
-          echo "y" | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-33" "emulator" "system-images;android-33;google_apis;x86_64"
-      - name: Print Android SDK version
-        run: sdkmanager --version
-      
-      - name: Set up and start Android Emulator
-        run: |
-          avdmanager create avd -n testEmulator -k "system-images;android-33;google_apis;x86_64" --device "pixel"
-          nohup emulator -avd testEmulator -no-snapshot -no-window -gpu swiftshader_indirect & adb wait-for-device
-          adb shell input keyevent 82
-      - name: Print Android Emulator version
-        run: emulator -version
+          echo "Setting up Android SDK"
+          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          sdkmanager --licenses
+          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
+          emulator -avd test_avd -no-snapshot &
 
-      # iOS Simulator setup
-      - name: Install Xcode command line tools
+      # Set up Xcode simulator
+      - name: Set up Xcode Simulator
         run: |
           xcode-select --install
-          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-      - name: Print Xcode version
-        run: xcodebuild -version
-      
-      - name: Create and boot iOS simulator
+          sudo xcodebuild -license accept
+          xcrun simctl boot "iPhone 14" # Booting a simulator
+
+      # Run Appium tests
+      - name: Run Appium tests
         run: |
-          xcrun simctl create testSimulator com.apple.CoreSimulator.SimDeviceType.iPhone-14 com.apple.CoreSimulator.SimRuntime.iOS-16-4
-          xcrun simctl boot testSimulator
+          appium & # Start Appium server
+          python -m pytest --alluredir=allure-results # Run your tests
+
+      # Generate and store Allure report
+      - name: Allure Report Generation
+        run: |
+          allure generate allure-results --clean -o allure-report
+        continue-on-error: true
+
+      # Upload Allure report as an artifact
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-report
+          path: allure-report
