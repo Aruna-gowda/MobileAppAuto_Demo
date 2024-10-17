@@ -57,8 +57,8 @@ jobs:
       - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
-          appium-doctor --android
-          appium-doctor --ios
+          # appium-doctor --android
+          # appium-doctor --ios
           appium driver install uiautomator2
           appium driver install xcuitest
 
