@@ -12,9 +12,19 @@ jobs:
 
     env:
       # Set environment variables for Android SDK, Java, and other tools
-      JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+      JAVA_HOME: /Users/runner/hostedtoolcache/Java_Zulu_jdk/17.0.13-11/arm64
       ANDROID_HOME: $HOME/Library/Android/sdk
       PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
+      pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
+      PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.7/arm64/lib/pkgconfig
+      Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
+      Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
+      Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
+      JAVA_HOME_17_ARM64: /Users/runner/hostedtoolcache/Java_Zulu_jdk/17.0.13-11/arm64
+    
+      # JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+      # ANDROID_HOME: $HOME/Library/Android/sdk
+      # PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
 
     steps:
       # Check for tar installation
