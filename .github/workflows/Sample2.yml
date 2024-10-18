@@ -12,30 +12,39 @@ jobs:
 
     env:
       # Set environment variables for Android SDK, Java, and other tools
-      JAVA_HOME: /Users/runner/hostedtoolcache/Java_Zulu_jdk/17.0.13-11/arm64
+      JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
       ANDROID_HOME: $HOME/Library/Android/sdk
-      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
-      pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
-      PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.7/arm64/lib/pkgconfig
-      Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
-      Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
-      Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.7/arm64
-      JAVA_HOME_17_ARM64: /Users/runner/hostedtoolcache/Java_Zulu_jdk/17.0.13-11/arm64
-    
-      # JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
-      # ANDROID_HOME: $HOME/Library/Android/sdk
-      # PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$PATH
+      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
     steps:
-      # Check for tar installation
-      - name: Check tar installation
-        run: |
-          which tar
-          tar --version
-
       # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Set up Java JDK
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Install Android SDK command-line tools
+      - name: Install Android SDK command-line tools
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip
+          unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+
+      # Install Android SDK components
+      - name: Install Android SDK components
+        run: |
+          echo "Setting up Android SDK"
+          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+          sdkmanager --install "system-images;android-30;google_apis;x86_64"
+          sdkmanager --licenses
+          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
+          emulator -avd test_avd -no-snapshot -no-audio -no-window &
 
       # Set up Python
       - name: Set up Python
@@ -50,66 +59,12 @@ jobs:
           pip install -r requirements.txt
           pip install allure-python-commons allure-behave
 
-      # Set up Java JDK
-      - name: Set up Java JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      # Set up Node.js and npm
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-  
-      # # Set up environment variables
-      # - name: Set environment variables
-      #   run: |
-      #     # Set JAVA_HOME
-      #     echo "JAVA_HOME=/usr/local/opt/openjdk/libexec/openjdk.jdk/Contents/Home" >> $GITHUB_ENV
-        
-      #     # Set npm global directory
-      #     echo "NPM_CONFIG_PREFIX=$HOME/.npm-global" >> $GITHUB_ENV
-      #     echo "PATH=$NPM_CONFIG_PREFIX/bin:$PATH" >> $GITHUB_ENV
-  
-      #     # Set Android SDK environment variables
-      #     echo "ANDROID_HOME=/usr/local/Caskroom/android-studio/latest/android-sdk" >> $GITHUB_ENV
-      #     echo "PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$PATH" >> $GITHUB_ENV
-  
-      #     # Set Homebrew Python path
-      #     echo "PATH=/usr/local/opt/python@3.12/bin:$PATH" >> $GITHUB_ENV
-  
-      # # Verify environment variables
-      # - name: Verify environment variables
-      #   run: |
-      #     echo "JAVA_HOME: $JAVA_HOME"
-      #     echo "NPM_CONFIG_PREFIX: $NPM_CONFIG_PREFIX"
-      #     echo "ANDROID_HOME: $ANDROID_HOME"
-      #     echo "Python Path: $(which python3)"
-
       # Install Appium and drivers
       - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
           appium driver install uiautomator2
           appium driver install xcuitest
-
-      # Set up Android SDK and create Android Emulator
-      - name: Set up Android SDK and create Android Emulator
-        run: |
-          echo "Setting up Android SDK"
-          sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
-          sdkmanager --install "system-images;android-30;google_apis;x86_64"
-          sdkmanager --licenses
-          avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
-          emulator -avd test_avd -no-snapshot -no-audio -no-window &
-
-      # Set up Xcode simulator
-      - name: Set up Xcode Simulator
-        run: |
-          sudo xcodebuild -license accept
-          xcrun simctl boot "iPhone 14" # Booting iPhone simulator
 
       # Run Appium tests
       - name: Run Appium tests
