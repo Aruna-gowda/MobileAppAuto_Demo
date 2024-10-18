@@ -56,10 +56,17 @@ jobs:
         run: |
           brew install allure
 
+      # Set up and boot the simulator
+      - name: Set up and boot iOS Simulator
+        run: |
+          xcrun simctl boot "iPhone 14" # Booting the specified simulator
+          sleep 15 # Wait for the simulator to fully boot
+
       # Run Appium tests
       - name: Run Appium tests
         run: |
           appium & # Start Appium server
+          sleep 5 # Wait for Appium server to start
           python -m pytest --alluredir=allure-results # Run tests and store Allure results
 
       # Generate and store Allure report
@@ -88,4 +95,3 @@ jobs:
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           echo "Allure Report is published here! View it [here](https://${{ github.repository_owner }}.github.io/$REPO_NAME/)" >> $GITHUB_STEP_SUMMARY
-        
