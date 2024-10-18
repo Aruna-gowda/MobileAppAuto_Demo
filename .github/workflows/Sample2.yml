@@ -13,8 +13,8 @@ jobs:
     env:
       # Set environment variables for Android SDK, Java, and other tools
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
-      ANDROID_HOME: $HOME/Library/Android/sdk
-      PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+      # ANDROID_HOME: $HOME/Library/Android/sdk
+      # PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
     steps:
       # Checkout code
