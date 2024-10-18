@@ -11,10 +11,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      # Set environment variables for Android SDK, Java, and other tools
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
-      # ANDROID_HOME: $HOME/Library/Android/sdk
-      # PATH: /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
     steps:
       # Checkout code
@@ -27,24 +24,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      # # Install Android SDK command-line tools
-      # - name: Install Android SDK command-line tools
-      #   run: |
-      #     mkdir -p $ANDROID_HOME/cmdline-tools
-      #     curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip
-      #     unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-      #     mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-
-      # # Install Android SDK components
-      # - name: Install Android SDK components
-      #   run: |
-      #     echo "Setting up Android SDK"
-      #     sdkmanager --install "platform-tools" "platforms;android-30" "build-tools;30.0.3"
-      #     sdkmanager --install "system-images;android-30;google_apis;x86_64"
-      #     sdkmanager --licenses
-      #     avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64" --force
-      #     emulator -avd test_avd -no-snapshot -no-audio -no-window &
 
       # Set up Python
       - name: Set up Python
@@ -65,6 +44,11 @@ jobs:
           npm install -g appium appium-doctor
           appium driver install uiautomator2
           appium driver install xcuitest
+
+      # Install Allure CLI (fix)
+      - name: Install Allure CLI
+        run: |
+          brew install allure
 
       # Run Appium tests
       - name: Run Appium tests
