@@ -87,7 +87,9 @@ jobs:
       - name: Add link to Allure report in summary
         run: |
           echo "Allure Report is published! View it [here](https://${{ github.repository_owner }}.github.io/${{ github.repository }}/)" >> $GITHUB_STEP_SUMMARY
-          echo "2_Allure Report is published! View it [here](https://${{ github.repository_owner }}.github.io/${{ github.repository }}/)" >> $GITHUB_STEP_SUMMARY
-          echo "Repository Name: ${{ github.repository }}"
+          # echo "Repository Name: ${{ github.repository }}"
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          echo "2_Allure Report is published! View it [here](https://${{ github.repository_owner }}.github.io/$REPO_NAME/)" >> $GITHUB_STEP_SUMMARY
+          echo "Repository Name: $REPO_NAME"
           # https://aruna-gowda.github.io/Aruna-gowda/MobileAppAuto_Demo/
           # https://aruna-gowda.github.io/
