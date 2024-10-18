@@ -47,45 +47,45 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-    # Set up Node.js and npm
+      # Set up Node.js and npm
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
   
-      - name: Set up environment variables
-      run: |
-        # Set JAVA_HOME
-        echo "JAVA_HOME=/usr/local/opt/openjdk/libexec/openjdk.jdk/Contents/Home" >> $GITHUB_ENV
+      # Set up environment variables
+      - name: Set environment variables
+        run: |
+          # Set JAVA_HOME
+          echo "JAVA_HOME=/usr/local/opt/openjdk/libexec/openjdk.jdk/Contents/Home" >> $GITHUB_ENV
         
-        # Set npm global directory
-        echo "NPM_CONFIG_PREFIX=$HOME/.npm-global" >> $GITHUB_ENV
-        echo "PATH=$NPM_CONFIG_PREFIX/bin:$PATH" >> $GITHUB_ENV
+          # Set npm global directory
+          echo "NPM_CONFIG_PREFIX=$HOME/.npm-global" >> $GITHUB_ENV
+          echo "PATH=$NPM_CONFIG_PREFIX/bin:$PATH" >> $GITHUB_ENV
   
-        # Set Android SDK environment variables
-        echo "ANDROID_HOME=/usr/local/Caskroom/android-studio/latest/android-sdk" >> $GITHUB_ENV
-        echo "PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$PATH" >> $GITHUB_ENV
+          # Set Android SDK environment variables
+          echo "ANDROID_HOME=/usr/local/Caskroom/android-studio/latest/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_HOME/emulator:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$PATH" >> $GITHUB_ENV
   
-        # Set Homebrew Python path
-        echo "PATH=/usr/local/opt/python@3.12/bin:$PATH" >> $GITHUB_ENV
+          # Set Homebrew Python path
+          echo "PATH=/usr/local/opt/python@3.12/bin:$PATH" >> $GITHUB_ENV
   
-    - name: Verify environment variables
-      run: |
-        echo "JAVA_HOME: $JAVA_HOME"
-        echo "NPM_CONFIG_PREFIX: $NPM_CONFIG_PREFIX"
-        echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "Python Path: $(which python3)"
+      # Verify environment variables
+      - name: Verify environment variables
+        run: |
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "NPM_CONFIG_PREFIX: $NPM_CONFIG_PREFIX"
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          echo "Python Path: $(which python3)"
 
-      # Install Appium and related tools via npm
+      # Install Appium and drivers
       - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
-          # appium-doctor --android
-          # appium-doctor --ios
           appium driver install uiautomator2
           appium driver install xcuitest
 
-      # Set up Android SDK and emulator
+      # Set up Android SDK and create Android Emulator
       - name: Set up Android SDK and create Android Emulator
         run: |
           echo "Setting up Android SDK"
