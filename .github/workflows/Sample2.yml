@@ -85,4 +85,6 @@ jobs:
 
       # Add link to Allure report in workflow summary
       - name: Add link to Allure report in summary
-        run: echo "Allure Report is published! View it [here](https://${{ github.repository_owner }}.github.io/${{ github.repository }}/)" >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo "Allure Report is published! View it [here](https://${{ github.repository_owner }}.github.io/${{ github.repository }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "2_Allure Report is published! View it [here](https://${{ github.repository_owner }}.github.io/)" >> $GITHUB_STEP_SUMMARY
