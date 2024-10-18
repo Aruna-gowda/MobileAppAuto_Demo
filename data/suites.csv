@@ -1,3 +1,3 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","6765","Verify User able to login with valid Credentials","TestCases","Fri Oct 18 06:42:44 UTC 2024","passed","Fri Oct 18 06:42:51 UTC 2024","TestHomePage","test_LoginPage","",""
-"","2427","Verify User able to login with valid Credentials","TestCases","Fri Oct 18 06:42:51 UTC 2024","passed","Fri Oct 18 06:42:53 UTC 2024","TestLoginPage","test_Sample","",""
+"","1943","Verify User able to login with valid Credentials","TestCases","Fri Oct 18 06:49:46 UTC 2024","passed","Fri Oct 18 06:49:48 UTC 2024","TestLoginPage","test_Sample","",""
+"","5119","Verify User able to login with valid Credentials","TestCases","Fri Oct 18 06:49:41 UTC 2024","passed","Fri Oct 18 06:49:46 UTC 2024","TestHomePage","test_LoginPage","",""
