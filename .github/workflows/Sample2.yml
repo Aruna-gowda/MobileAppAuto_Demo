@@ -60,7 +60,7 @@ jobs:
       - name: Launch Android Emulator
         run: |
           echo "Starting Android Emulator..."
-          emulator -avd <YOUR_AVD_NAME> -no-snapshot -no-audio -no-window &
+          emulator -avd Pixel_4_API_30 -no-snapshot -no-audio -no-window & # Replace with your AVD name
           sleep 30 # Wait for the emulator to boot up
 
       # Wait for the emulator to be fully booted
