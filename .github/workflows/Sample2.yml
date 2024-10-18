@@ -56,11 +56,16 @@ jobs:
         run: |
           brew install allure
 
+      # List available Android Virtual Devices
+      - name: List Available AVDs
+        run: |
+          emulator -list-avds
+
       # Launch the Android Emulator
       - name: Launch Android Emulator
         run: |
           echo "Starting Android Emulator..."
-          emulator -avd Pixel_4_API_30 -no-snapshot -no-audio -no-window & # Replace with your AVD name
+          emulator -avd Pixel_4_API_30 -no-snapshot -no-audio -no-window & # Make sure to replace with your AVD name
           sleep 30 # Wait for the emulator to boot up
 
       # Wait for the emulator to be fully booted
