@@ -63,11 +63,20 @@ jobs:
           emulator -avd <YOUR_AVD_NAME> -no-snapshot -no-audio -no-window &
           sleep 30 # Wait for the emulator to boot up
 
+      # Wait for the emulator to be fully booted
+      - name: Wait for Emulator
+        run: |
+          echo "Waiting for the emulator to boot..."
+          until adb shell getprop sys.boot_completed | tr -d '\r' | grep -m 1 '1'; do
+            sleep 5
+          done
+          echo "Emulator is ready."
+
       # List active Android Emulators
       - name: List Active Android Emulators
         run: |
           echo "Active Android Emulators:"
-          emulator -list-avds | xargs -n1 -I {} sh -c 'echo "{}: $(adb -s emulator-5554 get-state)"' | grep "emulator-5554: " 
+          adb devices
 
       # # Run Appium tests
       # - name: Run Appium tests
