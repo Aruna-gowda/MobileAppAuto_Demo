@@ -56,17 +56,18 @@ jobs:
         run: |
           brew install allure
 
-      # Set up and boot the iPhone 14 simulator
-      - name: Set up and boot iPhone 14 Simulator
+      # Launch the Android Emulator
+      - name: Launch Android Emulator
         run: |
-          xcrun simctl boot "iPhone 14" # Booting the specified simulator
-          sleep 15 # Wait for the simulator to fully boot
+          echo "Starting Android Emulator..."
+          emulator -avd <YOUR_AVD_NAME> -no-snapshot -no-audio -no-window &
+          sleep 30 # Wait for the emulator to boot up
 
-      # List only active and launched iOS Simulators
-      - name: List Active iOS Simulators
+      # List active Android Emulators
+      - name: List Active Android Emulators
         run: |
-          echo "Active and Launched iOS Simulators:"
-          xcrun simctl list devices | grep -E 'iPhone|iPad' | grep -E 'Booted|Shut Down' | awk -F '[()]' '{print $1}'
+          echo "Active Android Emulators:"
+          emulator -list-avds | xargs -n1 -I {} sh -c 'echo "{}: $(adb -s emulator-5554 get-state)"' | grep "emulator-5554: " 
 
       # # Run Appium tests
       # - name: Run Appium tests
