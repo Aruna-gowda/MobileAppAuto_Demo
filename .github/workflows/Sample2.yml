@@ -31,6 +31,12 @@ jobs:
         with:
           python-version: '3.x'
 
+      # Install Node.js version 20
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       # Install Python dependencies
       - name: Install dependencies
         run: |
@@ -45,7 +51,7 @@ jobs:
           appium driver install uiautomator2
           appium driver install xcuitest
 
-      # Install Allure CLI (fix)
+      # Install Allure CLI
       - name: Install Allure CLI
         run: |
           brew install allure
