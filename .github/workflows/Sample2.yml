@@ -12,6 +12,8 @@ jobs:
 
     env:
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+      ANDROID_HOME: $HOME/Library/Android/sdk
+      PATH: $ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 
     steps:
       # Checkout code
@@ -56,14 +58,15 @@ jobs:
         run: |
           brew install allure
 
-      # Install Android SDK and Android Studio components
-      - name: Install Android Studio and SDK
+      # Install Android SDK command-line tools
+      - name: Install Android SDK
         run: |
-          echo "Installing Android Studio and SDK..."
-          brew install --cask android-studio
           echo "Installing Android SDK..."
-          sdkmanager "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64" "emulator"
-          echo "Installing AVD components..."
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip
+          unzip sdk-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64" "emulator"
 
       # Accept licenses for SDK components
       - name: Accept SDK Licenses
@@ -126,4 +129,4 @@ jobs:
       # - name: Add link to Allure report in summary
       #   run: |
       #     REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-      #     echo "Allure Report is published here! View it [here](https://${{ github.repository_owner }}.github.io/$REPO_NAME/)" >> $GITHUB_STEP_SUMMARY
+      #     echo "Allure Report is published here! View it [here](
