@@ -53,10 +53,10 @@ jobs:
           appium driver install uiautomator2
           appium driver install xcuitest
 
-      # # Install Allure CLI
-      # - name: Install Allure CLI
-      #   run: |
-      #     brew install allure
+      # Install Allure CLI
+      - name: Install Allure CLI
+        run: |
+          brew install allure
 
       # Install Android SDK command-line tools
       - name: Install Android SDK
@@ -66,12 +66,24 @@ jobs:
           curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip
           unzip sdk-tools.zip -d $ANDROID_HOME/cmdline-tools
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64" "emulator"
+          
+          # Fix PATH issue
+          echo "Setting up PATH for sdkmanager"
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+
+          # Verify sdkmanager installation
+          sdkmanager --version
 
       # Accept licenses for SDK components
       - name: Accept SDK Licenses
         run: |
+          echo "Accepting licenses..."
           yes | sdkmanager --licenses
+
+      # Install Android Emulator components
+      - name: Install Android Emulator
+        run: |
+          sdkmanager "platform-tools" "platforms;android-30" "system-images;android-30;google_apis;x86_64" "emulator"
 
       # Create and start an Android Emulator
       - name: Create and Start Android Emulator
