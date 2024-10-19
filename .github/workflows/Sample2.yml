@@ -53,10 +53,10 @@ jobs:
           appium driver install uiautomator2
           appium driver install xcuitest
 
-      # Install Allure CLI
-      - name: Install Allure CLI
-        run: |
-          brew install allure
+      # # Install Allure CLI
+      # - name: Install Allure CLI
+      #   run: |
+      #     brew install allure
 
       # Install Android SDK command-line tools
       - name: Install Android SDK
