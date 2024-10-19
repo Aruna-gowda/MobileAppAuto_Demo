@@ -13,12 +13,17 @@ jobs:
     env:
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
       ANDROID_HOME: $HOME/Library/Android/sdk
-      PATH: $ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+      PATH: $ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:/usr/bin:$PATH
 
     steps:
       # Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # Install command-line utilities (including tar)
+      - name: Install essential utilities
+        run: |
+          brew install tar
 
       # Set up Java JDK
       - name: Set up Java JDK 17
@@ -129,4 +134,4 @@ jobs:
       # - name: Add link to Allure report in summary
       #   run: |
       #     REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-      #     echo "Allure Report is published here! View it [here](
+      #     echo "Allure Report is published here! View it [here](https://${{ github.repository_owner }}.github.io/$REPO_NAME/)" >> $GITHUB_STEP_SUMMARY
