@@ -73,7 +73,7 @@ jobs:
         run: |
           echo "Waiting for the emulator to boot..."
           until adb shell getprop sys.boot_completed | tr -d '\r' | grep -m 1 '1'; do
-            sleep 5
+            sleep 2
           done
           echo "Emulator is ready."
 
