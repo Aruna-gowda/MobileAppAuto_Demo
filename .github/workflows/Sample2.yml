@@ -9,38 +9,33 @@ on:
 jobs:
   setup-run-publish:
     runs-on: macos-latest
-
     env:
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+      ANDROID_HOME: /Library/Android/sdk
 
     steps:
-      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Set up Java JDK
       - name: Set up Java JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # Set up Python
-      - name: Set up Python
+      - name: Set up Python 3.x
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # Install Node.js version 20
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Install Python dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install -r requirements.txt
           pip install allure-python-commons allure-behave
 
@@ -48,57 +43,46 @@ jobs:
         run: |
           echo "$ANDROID_HOME"
           sdkmanager --install "platform-tools" "platforms;android-29" "build-tools;29.0.2"
-
-      - name: Create and start emulator
-        run: |
           avdmanager create avd --name test-emulator --device "pixel" --package "system-images;android-29;google_apis;x86"
           emulator -avd test-emulator -no-window -no-boot-anim &
 
-      # Install Appium and drivers
       - name: Install Appium and drivers
         run: |
           npm install -g appium appium-doctor
           appium driver install uiautomator2
           appium driver install xcuitest
 
-      # Install Allure CLI
       - name: Install Allure CLI
         run: |
           brew install allure
 
-      # Set up and boot the iPhone 14 simulator
-      - name: Set up and boot iPhone 14 Simulator
+      - name: Set up and boot iPhone 14 simulator
         run: |
-          xcrun simctl boot "iPhone 14" # Booting the specified simulator
-          sleep 15 # Wait for the simulator to fully boot
+          xcrun simctl boot "iPhone 14"
+          sleep 15
 
-      # List only active and launched iOS Simulators
       - name: List Active iOS Simulators
         run: |
           echo "Active and Launched iOS Simulators:"
           xcrun simctl list devices | grep -E 'iPhone|iPad' | grep -E 'Booted|Shut Down' | awk -F '[()]' '{print $1}'
 
-      # Run Appium tests
       - name: Run Appium tests
         run: |
-          appium & # Start Appium server
-          sleep 5 # Wait for Appium server to start
-          python -m pytest --alluredir=allure-results # Run tests and store Allure results
+          appium &
+          sleep 5
+          python -m pytest --alluredir=allure-results
 
-      # Generate and store Allure report
       - name: Generate Allure Report
         run: |
           allure generate allure-results --clean -o allure-report
         continue-on-error: true
 
-      # Upload Allure report as an artifact
       - name: Upload Allure Report
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
           path: allure-report
 
-      # Deploy Allure report to GitHub Pages
       - name: Deploy Allure Report to GitHub Pages
         if: success()
         uses: peaceiris/actions-gh-pages@v4
@@ -106,8 +90,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./allure-report
 
-      # Add link to Allure report in workflow summary
       - name: Add link to Allure report in summary
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          echo "Allure Report is published here! View it [here](https://${{ github.repository_owner }}.github.io/$REPO_NAME/)" >> $GITHUB_STEP_SUMMARY
+          echo "Allure Report is published here! View it [here](https://${{ github.repository_owner }}.(link unavailable))" >> $GITHUB_STEP_SUMMARY
