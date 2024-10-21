@@ -44,6 +44,16 @@ jobs:
           pip install -r requirements.txt
           pip install allure-python-commons allure-behave
 
+      - name: Setup Android SDK
+        run: |
+          echo "$ANDROID_HOME"
+          sdkmanager --install "platform-tools" "platforms;android-29" "build-tools;29.0.2"
+
+      - name: Create and start emulator
+        run: |
+          avdmanager create avd --name test-emulator --device "pixel" --package "system-images;android-29;google_apis;x86"
+          emulator -avd test-emulator -no-window -no-boot-anim &
+
       # Install Appium and drivers
       - name: Install Appium and drivers
         run: |
