@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-latest
     env:
       JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
-      ANDROID_HOME: /Library/Android/sdk
+      ANDROID_HOME: /Users/runner/Library/Android/sdk
 
     steps:
       - name: Checkout code
@@ -42,6 +42,7 @@ jobs:
       - name: Setup Android SDK
         run: |
           echo "$ANDROID_HOME"
+          export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
           sdkmanager --install "platform-tools" "platforms;android-29" "build-tools;29.0.2"
           avdmanager create avd --name test-emulator --device "pixel" --package "system-images;android-29;google_apis;x86"
           emulator -avd test-emulator -no-window -no-boot-anim &
