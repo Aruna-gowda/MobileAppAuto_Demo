@@ -20,3 +20,5 @@ class TestLoginPage():
         driver.implicitly_wait(10)
         driver.get("https://stage-app.edifyai.com/login")
         driver.quit()
+        print('done')
+//jnfkdkk delte later
