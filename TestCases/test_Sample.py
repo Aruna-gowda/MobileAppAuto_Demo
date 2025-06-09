@@ -21,4 +21,3 @@ class TestLoginPage():
         driver.get("https://stage-app.edifyai.com/login")
         driver.quit()
         print('done')
-//jnfkdkk delte later
